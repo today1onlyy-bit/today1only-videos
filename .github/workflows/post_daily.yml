@@ -21,7 +21,7 @@ jobs:
         run: |
           NUM=${{ steps.num.outputs.num }}
           if [ "$NUM" -le 30 ]; then
-            sed -i "s/여기에_인스타_액세스_토큰/$ACCESS_TOKEN/" instagram_scheduler.py
+            sed -i "s|REPLACE_TOKEN|$ACCESS_TOKEN|" instagram_scheduler.py
             python instagram_scheduler.py $NUM
           fi
       - run: |
