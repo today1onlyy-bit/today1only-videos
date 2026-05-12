@@ -1,0 +1,32 @@
+name: Daily Instagram Post
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - id: num
+        run: echo "num=$(cat current_num.txt)" >> $GITHUB_OUTPUT
+      - env:
+          ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+        run: |
+          NUM=${{ steps.num.outputs.num }}
+          if [ "$NUM" -le 30 ]; then
+            sed -i "s/여기에_인스타_액세스_토큰/$ACCESS_TOKEN/" instagram_scheduler.py
+            python instagram_scheduler.py $NUM
+          fi
+      - run: |
+          NUM=${{ steps.num.outputs.num }}
+          echo $((NUM + 1)) > current_num.txt
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add current_num.txt
+          git commit -m "posted $NUM"
+          git push
